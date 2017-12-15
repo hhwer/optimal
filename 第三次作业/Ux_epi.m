@@ -2,7 +2,7 @@ function [ 	F,g,v,epi ] = Ux_epi( Funcs,m,x,u,p,epi)
 %calculate   U(x,u,p,epi)
 %input   
 %       Funcs         function_handle
-%                               Funcs(x)=[[f1(x),f2(x),...,fm(x)],{g1(x),g2(x),...,gm(x)},{G1(x),G2(x),...,Gm(x)}]                      
+%                               Funcs(x)=[[f1(x),f2(x),...,fm(x)],{g1(x),g2(x),...,gm(x)}]                      
 %       m               int     
 %       x                n_vector
 %                      

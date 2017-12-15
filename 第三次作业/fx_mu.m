@@ -39,7 +39,7 @@ if nargout == 3
     [~,g0,G0] = Funcs(x);
     for i =1:m
         g = g+lambda(i)*g0{i};
-        G = G + lambda(i)*G0{i} + lambda(i)/mu*g0{i}*g0{i}';
+        G = G + lambda(i)*G0{i} + lambda(i)/mu*(g0{i}*g0{i}');
     end
     G = G - 1/mu*(g*g');
 end

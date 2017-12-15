@@ -1,4 +1,4 @@
-function [ x0,f] = smooth2( Funcs,m,xb,p,Rule )
+function [ x0,f,trace] = smooth2( Funcs,m,xb,p,Rule )
 %smooth method2 learned
 %input   
 %       Funcs         function_handle
@@ -15,10 +15,12 @@ function [ x0,f] = smooth2( Funcs,m,xb,p,Rule )
 %       x0               n_vector  
 %       f               scalar      function_point
 xalpha = 10^1*max(max(Funcs(xb)),1);
-
+trace = zeros(1000,1);
+trace(1) = max(Funcs(xb));
 u = ones(m,1);
 n = length(xb);
 w = xb;
+t = 0;
 if ~isfield(Rule,'theta')
     Rule.theta = 0.9;
 end
@@ -34,13 +36,16 @@ for ite = 1:300
         x0 = w;
         z0 = max(Funcs(w));
     end
-    
+    g1 = 0;
+    s = ones(n+1,1);
     for  k = 0:200
         xz = [x0;z0];
         [P0,DxP,DzP,c,Df] = Pxz_epi( Funcs,m,xz,epi,xalpha,p);
         g = [DxP;DzP];
-        if norm(g) < 1e-8   %%step 2
-            if norm(c) < 1e-10
+        if norm(g) < 1e-16   %%step 2
+            
+            if norm(c) < 1e-16
+               f = max(Funcs(x0));
                 return
             else
                 epi = Rule.theta * epi;
@@ -56,8 +61,10 @@ for ite = 1:300
         end
         
         func = @(xz)Pxz_epi(Funcs, m , xz, epi, xalpha,p);
-        alpha = linesearch(func, xz, P0, g, -g,Rule);
-        xz1 = xz - alpha*g;
+        y1 = g-g1;
+        d = -(s'*y1)/(y1'*y1)*g;
+        alpha = linesearch(func, xz, P0, g, d,Rule);
+        xz1 = xz +alpha*d;
         y = xz1(1:n);
         r = xz1(n+1);
         if max(Funcs(y)) > max(Funcs(w)) - epi
@@ -67,9 +74,11 @@ for ite = 1:300
         else
             x0 = y;
             z0 = r;
+            s = alpha*d;
+            g1 = g;
         end
-        
-        
+        t = t+1;
+        trace(t) = max(Funcs(x0));
     end
     
     

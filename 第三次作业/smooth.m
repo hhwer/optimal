@@ -1,4 +1,4 @@
-function [ x,f ] = smooth( Funcs,m,x,mu,Rule )
+function [ x,f,trace ] = smooth( Funcs,m,x,mu,Rule )
 %smooth method by xu
 %input   
 %       Funcs         function_handle
@@ -13,20 +13,35 @@ function [ x,f ] = smooth( Funcs,m,x,mu,Rule )
 %output
 %       x               n_vector  
 %       f               scalar      function_point
-
-for k = 1:1000
+trace = zeros(1000,1);
+g1 = 0;
+n = length(x);
+s = ones(n,1);
+trace(1) =  max(Funcs(x));
+t = 1;
+for k = 1:200
     [f,g,G] = fx_mu( Funcs,m,x,mu);
-    d = -G\g;
+    y = g-g1;
+    if rcond(G) > 1e-16
+        d = -G\g;
+    else
+        d = -(s'*y)/(y'*y)*g;
+    end
+
     if d==0
         alpha = 0;
     else
         func = @(x)(fx_mu(Funcs,m,x,mu));
         alpha = linesearch(func, x, f, g, d,Rule);
     end
-    x1 = x + alpha*d;
+    s = alpha*d;
+    x1 = x + s;
+    t = t+1;
+    trace(t) =  max(Funcs(x1));
+    g1=g;
     err = abs(g'*d);
     disp(err);
-    if err < 1e-6
+    if err < 1e-8
         break
     end
     mu = mu*Rule.beta;
