@@ -19,7 +19,7 @@ n = length(x);
 s = ones(n,1);
 trace(1) =  max(Funcs(x));
 t = 1;
-for k = 1:200
+for k = 1:100
     [f,g,G] = fx_mu( Funcs,m,x,mu);
     y = g-g1;
     if rcond(G) > 1e-16
@@ -41,7 +41,7 @@ for k = 1:200
     g1=g;
     err = abs(g'*d);
     disp(err);
-    if err < 1e-8
+    if err < 1e-20
         break
     end
     mu = mu*Rule.beta;

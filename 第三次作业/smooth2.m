@@ -20,7 +20,7 @@ trace(1) = max(Funcs(xb));
 u = ones(m,1);
 n = length(xb);
 w = xb;
-t = 0;
+t = 1;
 if ~isfield(Rule,'theta')
     Rule.theta = 0.9;
 end
@@ -28,7 +28,7 @@ if ~isfield(Rule,'sigma')
     Rule.sigma = 0.1;
 end
 epi = 1;
-for ite = 1:300
+for ite = 1:150
     if max(Funcs(xb)) <= max(Funcs(w))   %%step 1
         x0 = xb;
         z0 = max(Funcs(xb));

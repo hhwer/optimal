@@ -11,10 +11,14 @@ t =1;
 for k = 1:4
     func = @(x)Ux_epi(Funcs,m,x,u,p,Rule.epi);
     flag = 0;
-    for ite = 1:200
+    for ite = 1:600
         [f,g,v,Rule.epi] = Ux_epi( Funcs,m,x,u,p,Rule.epi);
         y = g-g1;
         d = -(s'*y)/(y'*y)*g;
+        
+        if norm(y)<1e-20
+            d = -g;
+        end
         alpha = linesearch(func, x, f, g, d,Rule);
         if norm(g)<1e-6
             if flag==0 && k == 1
@@ -25,7 +29,7 @@ for k = 1:4
             else
                 disp([ite-1,k])
                 break
-                end
+            end
         end
         g1 = g;
         s = alpha*d;
@@ -34,7 +38,7 @@ for k = 1:4
         trace(t) = max(Funcs(x));
     end
     v0 = sum(v);
-    if v0 == 0;
+    if v0 == 0
         u = ones(m,1);
     else
         u = v./v0;
