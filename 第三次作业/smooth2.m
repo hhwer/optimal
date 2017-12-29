@@ -14,6 +14,7 @@ function [ x0,f,trace] = smooth2( Funcs,m,xb,p,Rule )
 %output
 %       x0               n_vector  
 %       f               scalar      function_point
+%       trace         vector     function value trace
 xalpha = 10^1*max(max(Funcs(xb)),1);
 trace = zeros(1000,1);
 trace(1) = max(Funcs(xb));

@@ -13,6 +13,7 @@ function [ x,f,trace ] = smooth( Funcs,m,x,mu,Rule )
 %output
 %       x               n_vector  
 %       f               scalar      function_point
+%       trace         vector     function value trace
 trace = zeros(1000,1);
 g1 = 0;
 n = length(x);

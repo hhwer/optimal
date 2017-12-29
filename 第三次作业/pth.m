@@ -1,6 +1,19 @@
 function [ x,f,trace ] = pth( Funcs,m,x,p,Rule )
-%UNTITLED4 此处显示有关此函数的摘要
-%   此处显示详细说明
+%pth method
+%input   
+%       Funcs         function_handle
+%                               Funcs(x)=[[f1(x),f2(x),...,fm(x)],{g1(x),g2(x),...,gm(x)}]                      
+%       m               int     
+%       x                n_vector
+%       p                scalar   
+%       Rule           struct   
+%                           Rule.beta   scalar
+%                                   more information see linesearch
+%
+%output
+%       x               n_vector  
+%       f               scalar      function_point
+%       trace         vector     function value trace
 trace = zeros(800,1);
 trace(1) = max(Funcs(x));
 u = ones(m,1);
