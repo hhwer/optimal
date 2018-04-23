@@ -26,19 +26,21 @@ for i = 1:N
         en(K+1,4:6) = en(K+1,1:3) + n0;
     end
 end
-
 Ke = cell(2,1);
-nabla1 = [0,-1;1,0;-1,1];
-Ke{1} = lambda*([nabla1(:,1);nabla1(:,2)]*[nabla1(:,1);nabla1(:,2)]');
-Ke{1}(1:3,1:3) = Ke{1}(1:3,1:3) + mu*(nabla1*nabla1');
-Ke{1}(4:6,4:6) = Ke{1}(4:6,4:6) + mu*(nabla1*nabla1');
-Ke{1} = Ke{1} + mu*[nabla1(:,1)*nabla1(:,1)',nabla1(:,2)*nabla1(:,1)';nabla1(:,1)*nabla1(:,2)',nabla1(:,2)*nabla1(:,2)'];
+nabla = [0,1,-1;-1,0,1];
+temp = [nabla(1,:),nabla(2,:)];
+Ke{1} = lambda*(temp'*temp);
+temp = mu*(nabla'*nabla);
+Ke{1}(1:3,1:3) = Ke{1}(1:3,1:3) + temp;
+Ke{1}(4:6,4:6) = Ke{1}(4:6,4:6) + temp;
+Ke{1} = Ke{1} + mu*[nabla(1,:)'*nabla(1,:),nabla(2,:)'*nabla(1,:);nabla(1,:)'*nabla(2,:),nabla(2,:)'*nabla(2,:)];
 Ke{1} = Ke{1}/2;
-
-nabla1 = [-1,0;1,-1;0,1];
-Ke{2} = lambda*([nabla1(:,1);nabla1(:,2)]*[nabla1(:,1);nabla1(:,2)]');
-Ke{2}(1:3,1:3) = Ke{2}(1:3,1:3) + mu*(nabla1*nabla1');
-Ke{2}(4:6,4:6) = Ke{2}(4:6,4:6) + mu*(nabla1*nabla1');
-Ke{2} = Ke{2} + mu*[nabla1(:,1)*nabla1(:,1)',nabla1(:,2)*nabla1(:,1)';nabla1(:,1)*nabla1(:,2)',nabla1(:,2)*nabla1(:,2)'];
+nabla = [-1,1,0;0,-1,1];
+temp = [nabla(1,:),nabla(2,:)];
+Ke{2} = lambda*(temp'*temp);
+temp = mu*(nabla'*nabla);
+Ke{2}(1:3,1:3) = Ke{2}(1:3,1:3) + temp;
+Ke{2}(4:6,4:6) = Ke{2}(4:6,4:6) + temp;
+Ke{2} = Ke{2} + mu*[nabla(1,:)'*nabla(1,:),nabla(2,:)'*nabla(1,:);nabla(1,:)'*nabla(2,:),nabla(2,:)'*nabla(2,:)];
 Ke{2} = Ke{2}/2;
 end

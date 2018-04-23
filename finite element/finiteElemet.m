@@ -7,10 +7,10 @@ function [U] = finiteElemet(N)
 %       U     vector         pointvalue
 
 lambda = 3.65*1e4;
-mu = 1.5250*1e4;
+mu = 1.525*1e4;
 f = 10;
 [en,Ke] = order(N,lambda,mu);
-[K,F] = getGlobalK(Ke,en,f,N);
+[K,F] = getGlobalK(N,Ke,en,f);
 
 U = K\F;
 
