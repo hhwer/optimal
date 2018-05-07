@@ -6,7 +6,7 @@ function [ x1,lossf ] = sag( a,b,x0,lambda,alpha)
 %   
 
 [n,p] = size(a);
-E = n;
+E = 2*n;
 lossf = zeros(E,p);
 
 grady = zeros(n,p);   %%recent gradient of each component f

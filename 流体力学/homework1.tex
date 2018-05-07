@@ -1,0 +1,248 @@
+\documentclass[UTF8]{ctexart}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{diagbox}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{cite}
+  \author{黄晃\ 数院 1701210098 }
+  \title{计算流体力学作业一}
+\begin{document}
+  \maketitle
+
+\section{}
+  $$
+  U_j^{n+1}=U_j^n-\lambda(F^-(U_{j+1}-F^-(U_j))-\lambda(F^+(U_j)-F^+(U_{j-1}))
+  $$
+
+
+  \begin{equation*}
+  \begin{split}
+      U_t+F(U)_x&=0 \\
+    A(U)&=\frac{\partial F}{\partial U} \\
+    A(U)&=R(U)\Lambda R^{-1}(U)\\
+    \Lambda &= diag(\lambda_1,\cdots,\lambda_m)
+  \end{split}
+  \end{equation*}
+
+$$
+F(U)=A(U)U
+$$
+
+$$
+\Lambda = \Lambda^++\Lambda^-
+$$
+
+
+
+$$
+A=A^++A^-.A^{\pm}=R\Lambda R^{-1}
+$$
+
+\paragraph{Steger-Warming}
+$$
+\lambda_i^{\pm}=\frac{1}{2}(\lambda_i\pm |\lambda_i|)
+$$
+
+
+\subsection{1维}
+\begin{equation*}
+  \begin{split}
+     U_t+F(U)_x&=0 \\
+     U=\left( \begin{matrix}
+                \rho \\
+                \rho u \\
+                E
+              \end{matrix}\right)=\left( \begin{matrix}
+                u_1\\
+                 u_2 \\
+                u_3
+              \end{matrix}\right) , & F=\left( \begin{matrix}
+                \rho u \\
+                \rho u^2+p \\
+                u(E+p)
+              \end{matrix}\right) =\left( \begin{matrix}
+                f_1\\
+                 f_2 \\
+                f_3
+                \end{matrix}
+                \right)
+  \end{split}
+\end{equation*}
+
+能量$$ E=\rho e +\frac{1}{2}\rho u^2$$
+e为比内能
+
+\paragraph{状态方程}
+假设为完全气体,$$p=(\gamma-1)\rho e.$$
+  $\gamma=\frac{c_p}{c_v}$为比热比.声速$a=\sqrt{\gamma p/\rho}$,$H=\frac{E+p}{\rho}$
+
+  \begin{equation*}
+       A(U)=  \left[ \begin{matrix}
+                        0 & 1 & 0 \\
+                        \frac{1}{2}(\gamma-3)u^2 & (3-\gamma)u & \gamma-1 \\
+                    \frac{1}{2}(\gamma-2)u^3-\frac{a^2u}{\gamma-1} & \frac{3-2\gamma}{2}u^2+\frac{a^2}{\gamma-1} & \gamma u
+                      \end{matrix} \right]
+  \end{equation*}
+
+$$
+\lambda_1=u-a,\lambda_2=u,\lambda_3=u+a.
+$$
+
+  \begin{equation*}
+       R(U)=  \left[ \begin{matrix}
+                        1 & 1 & 1 \\
+                        u-a & u & u+a \\
+                    H-ua & \frac{1}{2}u^2 & H+ua
+                      \end{matrix} \right]
+  \end{equation*}
+
+  \begin{equation*}
+       L(U)=  \frac{\gamma-1}{2a^2}\left[ \begin{matrix}
+                        \frac{1}{2}u^2+\frac{ua^2}{\gamma-1} & -u-\frac{a}{\gamma-1} & 1 \\
+                        \frac{2a^2}{\gamma-1}-u^2 & 2u & -2 \\
+                    \frac{1}{2}u^2-\frac{ua}{\gamma-1} & \frac{a}{\gamma-1}-u & 1
+                      \end{matrix} \right]
+  \end{equation*}
+
+
+  \begin{equation*}
+       F^{\pm}=  \frac{\rho}{2\gamma} \left\{
+       \lambda_1^{\pm} \left( \begin{matrix}
+         1 \\
+         u-a \\
+         H-ua
+       \end{matrix} \right)
+       +2(\gamma-1)\lambda_2^{\pm} \left( \begin{matrix}
+         1 \\
+         u \\
+         \frac{1}{2}u^2
+       \end{matrix} \right)
+        +\lambda_3^{\pm} \left( \begin{matrix}
+         1 \\
+         u+a \\
+         H+ua
+       \end{matrix} \right)
+        \right\}
+  \end{equation*}
+
+  \subsection{2维}
+\begin{equation*}
+     U_t+\frac{\partial f_1}{\partial x} + \frac{\partial f_2}{\partial y} =0
+     \end{equation*}
+     \begin{equation*}
+     U=\left( \begin{matrix}
+                \rho \\
+                \rho u \\
+                \rho v \\
+                E
+              \end{matrix}\right) ,  f_1=\left( \begin{matrix}
+                \rho u \\
+                \rho u^2+p \\
+                \rho uv \\
+                u(E+p)
+              \end{matrix}\right), f_2=\left( \begin{matrix}
+                \rho v \\
+                \rho uv \\
+                \rho v^2+p \\
+                v(E+p)
+              \end{matrix}\right)
+\end{equation*}
+  \paragraph{通量}
+  令$f=\alpha f_1 +\beta f_2$,(($\alpha,\beta)=(1,0),(0,1)$分别对应$f_1,f_2.$)则f的通量为
+  \begin{equation*}
+    F(\tilde{\lambda})=\frac{\rho}{2\gamma}\left[\begin{matrix}
+                                             \tilde{\lambda_0}+\tilde{\lambda_3}+\tilde{\lambda_4} \\
+                                             \tilde{\lambda_0}u+ \tilde{\lambda_3}u_1+ \tilde{\lambda_4}u_2 \\
+                                             \tilde{\lambda_0}v+ \tilde{\lambda_3}v_1+ \tilde{\lambda_4}v_2\\
+                                             \frac{\tilde{\lambda_0}}{2}(u^2+v^2) + \frac{\tilde{\lambda_3}}{2}(u_1^2+v_1^2) + \frac{\tilde{\lambda_4}}{2}(u_2^2+v_2^2) +W
+                                           \end{matrix}\right]
+  \end{equation*}
+  其中
+  \begin{equation*}
+    \begin{matrix}
+    \tilde{\lambda_0}=2(\gamma-1)\tilde{\lambda_1},u_1=u-c\tilde{k_1},u_2=u+c\tilde{k_1} \\
+    v_1=v-c\tilde{k_2},v_2=v+c\tilde{k_2},\tilde{k_1}=\alpha/\sigma,\tilde{k_2}=\beta/\sigma,\sigma=\sqrt{\alpha^2+\beta^2} \\
+    W = \frac{(3-\gamma)(\tilde{\lambda_3}+\tilde{\lambda_4})c^2}{2(\gamma-1)}
+   \end{matrix}
+  \end{equation*}
+  而A的特征值为$\lambda_{1,2}=\alpha u + \beta v, \lambda_{3,4}=\alpha u + \beta v \mp c \sigma $,若取$\tilde{\lambda_i}=\lambda_i^{\pm}$,则F为我们相要的通量的分裂
+\paragraph{维数分裂}
+    用$X_h^{(\tau)},Y_h^{(\tau)}$表示一维初值问题的近似解算子,对应的初值问题为
+    \begin{equation*}
+      u^{n+1/2}(x,y):\ \left\{ \begin{split}
+                                 \frac{\partial u}{\partial t} +\frac{\partial f}{\partial x}& =0 \\
+                                 u(x,y,t_n) & =u^n(x,y)
+                               \end{split}\right.
+    \end{equation*}
+    和
+ \begin{equation*}
+      u^{n+1}(x,y):\ \left\{ \begin{split}
+                                 \frac{\partial u}{\partial t} +\frac{\partial g}{\partial y}& =0 \\
+                                 u(x,y,t_n) & =u^{n+1/2}(x,y)
+                               \end{split}\right.
+    \end{equation*}
+    一个时间步后用二阶精度的分裂格式
+    $$
+    u(x,y,t_n+\tau)=Y_h^{(\tau/2)}X_h^{(\tau)}Y_h^{(\tau/2)}(u^n)
+    $$
+    来形成问题的解.
+  \subsection{3维}
+\begin{equation*}
+     U_t+\frac{\partial f_1}{\partial x} + \frac{\partial f_2}{\partial y} \frac{\partial f_3}{\partial z}=0
+     \end{equation*}
+     \begin{equation*}
+     U=\left( \begin{matrix}
+                \rho \\
+                \rho u \\
+                \rho v \\
+                \rho w \\
+                E
+              \end{matrix}\right) ,  f_1=\left( \begin{matrix}
+                \rho u \\
+                \rho u^2+p \\
+                \rho uv \\
+                \rho uw \\
+                u(E+p)
+              \end{matrix}\right), f_2=\left( \begin{matrix}
+                \rho v \\
+                \rho uv \\
+                \rho v^2+p \\
+                \rho vw \\
+                v(E+p)
+              \end{matrix}\right) , f_3=\left( \begin{matrix}
+                \rho w \\
+                \rho uw \\
+                \rho vw \\
+                \rho w^2+p \\
+                w(E+p)
+              \end{matrix}\right)
+\end{equation*}
+  与二维的情况类似,对于函数$f=\alpha_1f_1+\alpha_2f_2+\alpha_3f_3$,其通量为
+    \begin{equation*}
+    F(\tilde{\lambda})=\frac{\rho}{2\gamma}\left[\begin{matrix}
+                                             \tilde{\lambda_0}+\tilde{\lambda_4}+\tilde{\lambda_5} \\
+                                             \tilde{\lambda_0}u+ \tilde{\lambda_4}u_1+ \tilde{\lambda_5}u_2 \\
+                                             \tilde{\lambda_0}v+ \tilde{\lambda_4}v_1+ \tilde{\lambda_5}v_2\\
+                                             \tilde{\lambda_0}w+ \tilde{\lambda_4}w_1+ \tilde{\lambda_5}w_2\\
+                                             \frac{\tilde{\lambda_0}}{2}(u^2+v^2+w^2) + \frac{\tilde{\lambda_4}}{2}(u_1^2+v_1^2+w_1^2) +  \frac{\tilde{\lambda_5}}{2}(u_2^2+v_2^2+w_2^2) +W
+                                           \end{matrix}\right]
+  \end{equation*}
+
+  其中
+  \begin{equation*}
+    \begin{matrix}
+    \tilde{\lambda_0}=2(\gamma-1)\tilde{\lambda_1},u_1=u-c\tilde{k_1},u_2=u+c\tilde{k_1} \\
+    v_1=v-c\tilde{k_2},v_2=v+c\tilde{k_2},w_1=w-c\tilde{k_3},w_2=w+c\tilde{k_2},\\
+    \tilde{k_1}=\alpha_1/\sigma,\tilde{k_2}=\alpha_2/\sigma,\tilde{k_3}=\alpha_3/\sigma,\sigma=\sqrt{\alpha_1^2+\alpha_2^2+\alpha_3^2} \\
+    W = \frac{(3-\gamma)(\tilde{\lambda_4}+\tilde{\lambda_5})c^2}{2(\gamma-1)}
+   \end{matrix}
+  \end{equation*}
+  而A的特征值为$\lambda_{1,2,3}=\alpha_1 u + \alpha_2 v+\alpha_3w, \lambda_{4,5}=\alpha_1 u + \alpha_2 v  + \alpha_3 w \mp c \sigma  $,若取$\tilde{\lambda_i}=\lambda_i^{\pm}$,则F为我们相要的通量的分裂
+  
+  \paragraph{维数分裂}
+  与2维的情况类似可以定义$X_h^{(\tau)},Y_h^{(\tau)},Z_h^{(\tau)}$,用二阶精度的分裂格式
+    $$
+    u(x,y,t_n+\tau)=X_h^{(\tau/2)}Y_h^{(\tau/2)}Z_h^{(\tau)}Y_h^{(\tau/2)}X_h^{(\tau/2)}(u^n)
+    $$
+  \end{document} 

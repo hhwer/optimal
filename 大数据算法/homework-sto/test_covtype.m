@@ -5,7 +5,7 @@
 % b = covtype(:,55);
 % [n,p] = size(a);
 % hatx0 = zeros(1,p);
-lambda = 10000;
+lambda = 0.1;n
 m = floor(n/10);
 alpha = 0.01;
 K = 3;
