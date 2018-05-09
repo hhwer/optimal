@@ -13,8 +13,7 @@ t0 = toc;
 
 
 
-sigma0 = diag(sigma0);
-sigma0 = sigma0(1:k);
+
 
 tic
 [U1,sigma1,V1,t_q1 ] = rand_svd( A,c,k,1 );
@@ -24,8 +23,16 @@ tic
 [U2,sigma2,V2,t_q2 ] = rand_svd( A,c,k,2 );
 t2 = toc;
 
+sigma0 = diag(sigma0);
+sigma0 = sigma0(1:k);
+
 sigma1 = diag(sigma1);
 sigma2 = diag(sigma2);
 % sig = [sigma0(1:k),sigma(1:k)];
 % err = (sig(:,1)-sig(:,2))./sig(:,1);
 % disp(err(1));
+% sigma0 = sigma0(1:p);
+% sigma1 = sigma1(1:p);
+% sigma2 = sigma2(1:p);
+disp(norm((sigma0-sigma1)./sigma0))
+disp(norm((sigma0-sigma2)./sigma0))

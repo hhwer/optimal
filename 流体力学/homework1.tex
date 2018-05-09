@@ -10,10 +10,8 @@
 \begin{document}
   \maketitle
 
-\section{}
-  $$
-  U_j^{n+1}=U_j^n-\lambda(F^-(U_{j+1}-F^-(U_j))-\lambda(F^+(U_j)-F^+(U_{j-1}))
-  $$
+\section{欧拉方程}
+
 
 
   \begin{equation*}
@@ -24,6 +22,10 @@
     \Lambda &= diag(\lambda_1,\cdots,\lambda_m)
   \end{split}
   \end{equation*}
+\subsection{通量分裂}
+  $$
+  U_j^{n+1}=U_j^n-\lambda(F^-(U_{j+1}-F^-(U_j))-\lambda(F^+(U_j)-F^+(U_{j-1}))
+  $$
 
 $$
 F(U)=A(U)U
@@ -36,14 +38,18 @@ $$
 
 
 $$
-A=A^++A^-.A^{\pm}=R\Lambda R^{-1}
+A=A^++A^-.A^{\pm}=R\Lambda^{\pm} R^{-1}
 $$
 
 \paragraph{Steger-Warming}
 $$
 \lambda_i^{\pm}=\frac{1}{2}(\lambda_i\pm |\lambda_i|)
 $$
+为了稳定性,将其修改成
 
+$$
+\lambda_i^{\pm}=\frac{1}{2}(\lambda_i\pm \sqrt{|\lambda_i|^2+\epsilon^2})
+$$
 
 \subsection{1维}
 \begin{equation*}
@@ -239,10 +245,79 @@ $$
    \end{matrix}
   \end{equation*}
   而A的特征值为$\lambda_{1,2,3}=\alpha_1 u + \alpha_2 v+\alpha_3w, \lambda_{4,5}=\alpha_1 u + \alpha_2 v  + \alpha_3 w \mp c \sigma  $,若取$\tilde{\lambda_i}=\lambda_i^{\pm}$,则F为我们相要的通量的分裂
-  
+
   \paragraph{维数分裂}
   与2维的情况类似可以定义$X_h^{(\tau)},Y_h^{(\tau)},Z_h^{(\tau)}$,用二阶精度的分裂格式
     $$
     u(x,y,t_n+\tau)=X_h^{(\tau/2)}Y_h^{(\tau/2)}Z_h^{(\tau)}Y_h^{(\tau/2)}X_h^{(\tau/2)}(u^n)
     $$
-  \end{document} 
+
+    \section{矩方法}
+    粒子分布为$f(\vec{x},\vec{\xi},t)=\frac{\rho}{(2\pi T)^{D/2}}exp(-\frac{|\vec{\xi}-\vec{u}|^2}{2T})$,其中$\sqrt{\cdot}$表示x方向的平均算子.对x积分得到
+    $$
+    f(\vec{\xi},t) = \sum_{\alpha=0}^{+\infty}f_{\alpha}(t)H^{\alpha}(\frac{\vec{\xi}-\bar{u}}{\sqrt{\bar{T}}})
+    $$
+    其中$H^{\alpha}$为Hermite多项式基底.利用Hermite多项式的正交性可以得到$f_{\alpha}$的计算方法.
+    由于不确定H是物理意义下的H(上面的情况),还是概率意义下的H,下面分两种情况进行计算
+    \subsection{case1 物理H}
+    \paragraph{Hermite系数}
+     以一维为例
+     $$
+     \int_{-\infty}^{\infty}H^n(x)H^m(x)exp(-x^2)dx=\sqrt{\pi}2^nn!\delta_{nm}
+    $$
+    所以有$$
+    \int_{-\infty}^{\infty}H^n(\frac{\xi-u}{\sqrt{\bar{T}}})H^m(\frac{\xi-u}{\sqrt{\bar{T}}})exp(-\frac{|\xi-u|^2}{\bar{T}})d\xi = \sqrt{\pi\bar{T}}2^nn!\delta_{nm}
+    $$
+    在我们的算例中,利用如上正交性,有
+    \begin{equation*}
+      \begin{split}
+         f_{\alpha} & =\frac{1}{\sqrt{\pi\bar{T}}2^{\alpha}\alpha!}\int f(\xi,t)H^{\alpha}(\frac{\xi-u}{\sqrt{\bar{T}}})exp(-\frac{|\xi-u|^2}{\bar{T}})d\xi \\
+           & =\frac{1}{\sqrt{\pi\bar{T}}2^{\alpha}\alpha!}\int dx \frac{\rho}{\sqrt{2\pi T}}\int exp(\frac{(\xi-u)^2}{-2T}-\frac{|\xi-\bar{u}|^2}{\bar{T}})H^{\alpha}(\frac{\xi-\bar{u}}{\sqrt{\bar{T}}})d\xi
+      \end{split}
+    \end{equation*}
+    记$$B^{\alpha}(x)=\int  exp(\frac{(\xi-u)^2}{-2T}-\frac{|\xi-\bar{u}|^2}{\bar{T}})H^{\alpha}(\frac{\xi-\bar{u}}{\sqrt{\bar{T}}})d\xi$$,而对x的积分采用n点的数值积分,则在知道B的情况下,有
+    $$
+    f^{\alpha}(t)=\frac{1}{\sqrt{\pi\bar{T}}2^{\alpha}\alpha!}\int  \frac{\rho}{\sqrt{2\pi T}} B^{\alpha}(x) dx
+    $$
+
+    \paragraph{$B^{\alpha}$的计算}
+    利用Hermite多项式的性质
+    \begin{equation*}
+      \begin{matrix}
+         H^n = 2xH^{n-1}-2(n-1)H^{n-2} \\
+         \mathop{(H^{n})'}=2nH^{n-1},H^0 = 1
+      \end{matrix}
+    \end{equation*}
+    可以得到B的递推公式
+    $$
+    B^n = \frac{2\sqrt{\bar{T}}(u-\bar{u},)}{\bar{T}+2T}B^{n-1}+\frac{-2\bar{T}}{2T+\bar{T}}(n-1)B^{n-2}
+    $$
+    而
+    $$
+    B^0 = \sqrt{\frac{2T\bar{T}\pi}{2T+\bar{T}}}
+    $$
+    
+    \subsection{case2 概率H}
+        \begin{equation*}
+      \begin{matrix}
+         H^n = xH^{n-1}-(n-1)H^{n-2} \\
+         \mathop{(H^{n})'}=nH^{n-1},H^0 = 1
+      \end{matrix}
+    \end{equation*}
+    与之前类似,有
+   $$
+    f^{\alpha}(t)=\frac{1}{\sqrt{2\pi\bar{T}}\alpha!}\int  \frac{\rho}{\sqrt{2\pi T}} A^{\alpha}(x) dx
+    $$
+    \paragraph{A的计算}
+    
+    $$A^{\alpha}(x)=\int  exp(\frac{(\xi-u)^2}{-2T}-\frac{|\xi-\bar{u}|^2}{2\bar{T}})H^{\alpha}(\frac{\xi-\bar{u}}{\sqrt{\bar{T}}})d\xi$$
+  A的递推公式
+    $$
+    A^n = \frac{\sqrt{\bar{T}}(u-\bar{u},)}{\bar{T}+T}B^{n-1}+\frac{-\bar{T}}{T+\bar{T}}(n-1)B^{n-2}
+    $$
+    而
+    $$
+    A^0 = \sqrt{\frac{2T\bar{T}\pi}{T+\bar{T}}}exp(\frac{-(u-\bar{u})^2}{2(\bar{T}+T)})
+    $$
+    
+  \end{document}  

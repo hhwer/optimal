@@ -28,9 +28,9 @@ U(5,:,:,:) = rho.*e+1/2*rho.*(u.^2 + v.^2+w.^2);
 
 for i = 1:10
      U1 = FVS_3( U,gamma,lambda,0);
-%      disp((sum(reshape(U1,5,n^3)')-sum(reshape(U,5,n^3)'))./sum(reshape(U,5,n^3)'));
+     disp((sum(reshape(U1,5,n^3)')-sum(reshape(U,5,n^3)'))./sum(reshape(U,5,n^3)'));
 %      err = norm(U1-U,'fro')/norm(U,'fro');
-     disp(err);
+%      disp(err);
 %      if err < 1e-6
 %          break
 %      end

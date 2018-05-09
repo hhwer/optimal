@@ -1,4 +1,4 @@
-function [ f ] = falpha(U,gamma,alpha,k)
+function [ f ] = falpha1(U,gamma,alpha,k)
 %UNTITLED2 此处显示有关此函数的摘要
 %   此处显示详细说明
 [~,n,~] = size(U);
@@ -28,14 +28,13 @@ if k == 1
         c = sqrt(2*pi)*sqT;
 %         u = u-mean(u);    %%%不加这个  反而能看
         for i = 1:alpha
-            A1 = 2*u./sqT0.*A1 + (4*T-2*T0)./T0*(i-1).*A0;
+            A1 = u./sqT0.*A1 + (T-T0)./T0*(i-1).*A0;
             A0 = A1;
             temp = rho./c.*A1;
-%             f(i+1) = mean(temp)/sqT0;
-            f(i+1) = mean(temp);
+            f(i+1) = mean(temp)/sqT0;
+%             f(i+1) = mean(temp);
         end
     end
 end
 
 end
-
