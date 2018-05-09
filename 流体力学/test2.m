@@ -1,9 +1,9 @@
 
-tau = 0.001;
-h = 1;
-lambda = tau/h;
+tau = 0.01;
 gamma = 1.5;
 n = 100;
+h = 1/n;
+lambda = tau/h;
 x = 0:1/n:1-1/100000;
 y = x';
 rho = abs(rand(n,n));
@@ -23,7 +23,7 @@ e = abs(rand(n,n));
 % U(4,:,:) = rho.*e+1/2*rho.*(u.^2 + v.^2);
 % % U0 = U;
 
-u0 = zeros(3,n,n);
+u0 = zeros(4,n,n);
 u0(1,:,:) =0.2* (sin(x*pi)+sin(y*pi))+1;
 u0(2,:,:) = 0.3*(cos(x*pi)+sin(y*pi));
 u0(3,:,:) = 0.2*(cos(x*pi)+sin(y*pi));

@@ -1,6 +1,13 @@
 function [ f ] = falpha_weight(U,gamma,alpha,k)
-%UNTITLED2 此处显示有关此函数的摘要
-%   此处显示详细说明
+%       计算物理下的f
+%input
+%           U               (k+2)*n^k_vector            
+%           gamma      float                                              
+%           k                int                          维数
+%           alpha         int
+% output
+%           f                 vector                    f=[f0,f1,...,f_alpha]          
+
 [~,n,~] = size(U);
 if k == 1
     rho = U(1,:);
@@ -32,8 +39,9 @@ if k == 1
     
 
     for i = 1:alpha
-        A1 = 2*u1.*sqT0.*A1./T1  -2*T0./T1*(i-1).*A0;
+        A2 = 2*u1.*sqT0.*A1./T1  -2*T0./T1*(i-1).*A0;
         A0 = A1;
+        A1 = A2;
         temp = c.*A1;
         f(1+i) = mean(temp)/(2^i*factorial(i))/sqT0/sqrt(pi);
     end

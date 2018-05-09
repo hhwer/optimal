@@ -39,7 +39,7 @@ for k = 1:n
 %     lambda2 = [max(lambda2,0),min(lambda2,0)];
 %     lambda3 = [max(lambda3,0),min(lambda3,0)];
     lambda = [lambda1; 2*(gamma-1)*lambda2; lambda3];
-    F =rho/2/gamma * R*lambda;
+    F =rho/2/gamma * (R*lambda);
     Fblus(:,k) = F(:,1);
     Fminus(:,k) = F(:,2);
 end
