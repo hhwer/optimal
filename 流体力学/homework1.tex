@@ -296,7 +296,7 @@ $$
     $$
     B^0 = \sqrt{\frac{2T\bar{T}\pi}{2T+\bar{T}}}
     $$
-    
+
     \subsection{case2 概率H}
         \begin{equation*}
       \begin{matrix}
@@ -309,7 +309,7 @@ $$
     f^{\alpha}(t)=\frac{1}{\sqrt{2\pi\bar{T}}\alpha!}\int  \frac{\rho}{\sqrt{2\pi T}} A^{\alpha}(x) dx
     $$
     \paragraph{A的计算}
-    
+
     $$A^{\alpha}(x)=\int  exp(\frac{(\xi-u)^2}{-2T}-\frac{|\xi-\bar{u}|^2}{2\bar{T}})H^{\alpha}(\frac{\xi-\bar{u}}{\sqrt{\bar{T}}})d\xi$$
   A的递推公式
     $$
@@ -319,5 +319,98 @@ $$
     $$
     A^0 = \sqrt{\frac{2T\bar{T}\pi}{T+\bar{T}}}exp(\frac{-(u-\bar{u})^2}{2(\bar{T}+T)})
     $$
-    
+    \subsection{高维的计算}
+    对于二维以及三维的情况,一个hermite多项式为
+    $$
+    H^{m,n}(\vec{x})=H^{m}(x)*H^n(y),H^{m,n,l}(\vec{x})=H^{m}(x)*H^n(y)*H^l(z).
+    $$
+    利用多重积分的知识,可以从一维的情况轻易推出二三维$f_N$的计算公式
+\section{计算结果}
+由于计算量的关系,主要计算1维的例子
+\subsection{1维}
+\paragraph{case1}
+考虑光滑初值
+$$u=0.2cos(x\pi)+1,\rho u=0.3sin(x\pi),E=10+0.2cos(x\pi)$$
+
+取$n=1000,\tau=0.0002$计算到2s,图\ref{fig:1}显示了$f_{\alpha},\alpha=1,2\cdots 6$时的结果
+\begin{figure}[htbp]
+\centering\includegraphics[width=3.5in]{d1_1_1000_00002.eps}
+\caption{}\label{fig:1}
+\end{figure}
+为了看更长时间的变化,将n减小到100,对应的$\tau=0.002$,计算到t=200,见\ref{fig:2}
+\begin{figure}[htbp]
+\centering\includegraphics[width=3.5in]{d1-1-100-0002.eps}
+\caption{}\label{fig:2}
+\end{figure}
+图~\ref{fig:3}展示了n=100时前20s中$f_0$的变化情况
+\begin{figure}[htbp]
+\centering\includegraphics[width=3.5in]{d1-1-1000-00002-f0.eps}
+\caption{}\label{fig:3}
+\end{figure}
+
+\paragraph{case2}
+将case1中的动量加大
+$$u=0.2cos(x\pi)+1,\rho u=0.3sin(x\pi),E=10+0.2cos(x\pi)$$
+取$n=1000,\tau=0.0002$计算到2s,图\ref{fig:4}显示了$f_{\alpha},\alpha=1,2,3,4$时的结果
+\begin{figure}[htbp]
+\centering\includegraphics[width=3.5in]{d1_2_1000_00002.eps}
+\caption{}\label{fig:4}
+\end{figure}
+为了看更长时间的变化,将n减小到100,对应的$\tau=0.002$,计算到t=200,见\ref{fig:5}
+\begin{figure}[htbp]
+\centering\includegraphics[width=3.5in]{d1-2-100-0002.eps}
+\caption{}\label{fig:5}
+\end{figure}
+图~\ref{fig:6}展示了n=100时前20s中$f_0$的变化情况
+\begin{figure}[htbp]
+\centering\includegraphics[width=3.5in]{d1-2-100-0002-f01.eps}
+\caption{}\label{fig:6}
+\end{figure}
+
+\paragraph{case3}
+考虑间断初值,三段分片常数,图~\ref{fig:7}~\ref{fig:8}~\ref{fig:9}所示与之前相似
+\begin{figure}[htbp]
+\centering\includegraphics[width=3.5in]{d1_3_1000_00002.eps}
+\caption{}\label{fig:7}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering\includegraphics[width=3.5in]{d1-3-100-0002.eps}
+\caption{}\label{fig:8}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering\includegraphics[width=3.5in]{d1-3-100-0002-f01.eps}
+\caption{}\label{fig:9}
+\end{figure}
+
+\subsection{2维}
+使用一个光滑初值进行了计算n=100,50.~\ref{fig:10}~\ref{fig:100}
+\begin{figure}[htbp]
+\centering\includegraphics[width=3.5in]{d2-1-100-002.eps}
+\caption{}\label{fig:10}
+\end{figure}
+\begin{figure}[htbp]
+\centering\includegraphics[width=3.5in]{d2-1-50-002.eps}
+\caption{}\label{fig:100}
+\end{figure}
+\subsection{3维}
+使用光滑初值,分n=30,=10进行计算~\ref{fig:11}~\ref{fig:12}
+\begin{figure}[htbp]
+\centering\includegraphics[width=3.5in]{d3-1-30-002.eps}
+\caption{}\label{fig:11}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering\includegraphics[width=3.5in]{d3-1-10-001.eps}
+\caption{}\label{fig:12}
+\end{figure}
+\subsection{结果分析}
+\begin{itemize}
+  \item 1维时所给的光滑初值,$f_{\alpha}$在$\alpha$为偶数时,在足够长的时间过后趋于一个常数,而初始阶段,变化方式类似于分段直线,见图~\ref{fig:3}
+  \item 1维光滑初值的$f_{\alpha}$在$\alpha$为奇数时,没有偶数时光滑,但是长时间的计算下,包络可以视作一条较粗的直线,见图~\ref{fig:2}
+  \item 1维分片常数初值中,偶数的f与光滑初值类似,而奇数比上一组初值更光滑,但在长时间下,可见其包络的上端近似直线,见图~\ref{fig:9}
+  \item 2维情况在短时长内特征不明显,但长时长下的状况与1维类似
+  \item 3维情况,可见在中间部分的各个f较直
+\end{itemize}
   \end{document}  

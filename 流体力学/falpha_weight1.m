@@ -19,12 +19,9 @@ if k == 1
     T1 = T+T0;
     u1 = u - mean(u);  
     beta = sqT0*sqrt(2*pi);
-    A1 = sqrt(2*pi)*sqT*sqT0./sqrt(T1);
-    A1 = A1 .* exp(-u1.^2./T1/2);
+    A1 = rho./sqrt(T1)/sqrt(2*pi) .* exp(-u1.^2./T1/2);
     A0 = zeros(1,n);
-    c = rho./ (sqrt(2*pi)*sqT);
-    temp = c.*A1;
-    f(1) = mean(temp)/beta;
+    f(1) = mean(A1);
     a1 = u1.*sqT0./T1;
     t2 = -T0./T1;
     
@@ -34,15 +31,15 @@ if k == 1
         A2 = a1.*A1 + (i-1)*t2.*A0; 
         A0 = A1;
         A1 = A2;
-        temp = c.*A1;
-        f(1+i) = mean(temp) /(factorial(i)) /beta;
+        temp = A2;
+        f(1+i) = mean(temp) /(factorial(i));
     end
 
 elseif k == 2
     rho = U(1,:,:);
     u = U(2,:,:)./rho;
     v = U(3,:,:)./rho;
-    T = (gamma-1)*( U(4,:,:)./rho - u.^2/2-v.^2/2 );
+    T = (gamma-1)*( U(4,:,:) - (u.^2/2-v.^2/2).*rho );
     
     u1 = u - mean(mean(u)); 
     v1 = v - mean(mean(v));
@@ -80,7 +77,7 @@ elseif k == 2
     for i = 1:alpha
         for j = 1:alpha
             temp = rho./c.*A(i+2,:,:).*B(j+2,:,:);
-            f(i+1,j+1) = mean(mean(temp))/(factorial(i))/(factorial(j))/ beta;
+            f(i+1,j+1) = mean(mean(temp))/(factorial(i))/(factorial(j))/beta;
         end
         temp = rho./c.*A(i+2,:,:).*B(2,:,:);
         f(i+1,1) = mean(mean(temp))/(factorial(i))/beta;
@@ -93,7 +90,7 @@ else
     u = U(2,:,:,:)./rho;
     v = U(3,:,:,:)./rho;
     w = U(4,:,:,:)./rho;
-    T = (gamma-1)*( U(4,:,:,:)./rho - u.^2/2-v.^2/2 -w.^2/2);
+    T = (gamma-1)*( U(5,:,:,:) - (u.^2/2-v.^2/2 -w.^2/2).*rho);
     
     u1 = u - mean(mean(mean(u))); 
     v1 = v - mean(mean(mean(v)));
@@ -120,7 +117,7 @@ else
     beta = (sqT0*sqrt(2*pi))^3;
     
     c = (2*pi)^(3/2)*T.*sqT;
-    temp = rho./c.*A(2,:,:,:).*B(2,:,:,:)*C(3,:,:,:);
+    temp = rho./c.*A(2,:,:,:).*B(2,:,:,:).*C(2,:,:,:);
     f(1,1,1) = mean(mean(mean(temp)))/beta;
     
     a1 = u1.*sqT0./T1;
@@ -138,21 +135,21 @@ else
     for i = 1:alpha
         for j = 1:alpha
             for k = 1:alpha
-                temp = rho./c.*A(i+2,:,:,:).*B(j+2,:,:,:)*C(k+2,:,:,:);
+                temp = rho./c.*A(i+2,:,:,:).*B(j+2,:,:,:).*C(k+2,:,:,:);
                 f(i+1,j+1,k+1) = mean(mean(mean(temp)))/(factorial(i))/(factorial(j))/factorial(k)/ beta;
             end
-            temp = rho./c.*A(i+2,:,:,:).*B(j+2,:,:,:)*C(2,:,:,:);
+            temp = rho./c.*A(i+2,:,:,:).*B(j+2,:,:,:).*C(2,:,:,:);
             f(i+1,j+1,1) = mean(mean(mean(temp)))/(factorial(i))/(factorial(j))/ beta;
-            temp = rho./c.*A(i+2,:,:,:).*B(2,:,:,:)*C(j+2,:,:,:);
+            temp = rho./c.*A(i+2,:,:,:).*B(2,:,:,:).*C(j+2,:,:,:);
             f(i+1,1,j+1) = mean(mean(mean(temp)))/(factorial(i))/(factorial(j))/ beta;
-            temp = rho./c.*A(2,:,:,:).*B(i+2,:,:,:)*C(j+2,:,:,:);
+            temp = rho./c.*A(2,:,:,:).*B(i+2,:,:,:).*C(j+2,:,:,:);
             f(1,i+1,j+1) = mean(mean(mean(temp)))/(factorial(i))/(factorial(j))/ beta;
         end
-        temp = rho./c.*A(i+2,:,:,:).*B(2,:,:,:)*C(2,:,:,:);
+        temp = rho./c.*A(i+2,:,:,:).*B(2,:,:,:).*C(2,:,:,:);
         f(i+1,1,1) = mean(mean(mean(temp)))/(factorial(i))/ beta;
-        temp = rho./c.*A(2,:,:,:).*B(i+2,:,:,:)*C(2,:,:,:);
+        temp = rho./c.*A(2,:,:,:).*B(i+2,:,:,:).*C(2,:,:,:);
         f(1,i+1,1) = mean(mean(mean(temp)))/(factorial(i))/ beta;        
-        temp = rho./c.*A(2,:,:,:).*B(2,:,:,:)*C(i+2,:,:,:);
+        temp = rho./c.*A(2,:,:,:).*B(2,:,:,:).*C(i+2,:,:,:);
         f(1,1,i+1) = mean(mean(mean(temp)))/(factorial(i))/ beta;        
     end
     
