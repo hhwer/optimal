@@ -1,0 +1,81 @@
+\documentclass[UTF8]{ctexart}
+\usepackage{CJKutf8}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{diagbox}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{cite}
+
+  \author{黄晃\ 数院 1701210098 }
+  \title{homework-svd}
+\begin{document}
+
+  \maketitle
+
+
+\section{method}
+
+\subsection{method1:Linear Time SVD}
+算法直接使用教案中所描述的,其中$p_i$的选择,参考了所给文献,取$p_i=\frac{\|A(:,i)\|_2^2}{\|A\|_F^2}$,得到近似左特征X后,计算$Y=(X'A)'$,然后对Y做SVD,生成右特征
+$$
+[V,S,W] = svd(Y,0),U=XW;
+$$
+则(U,S,V)为对应的k个SVD
+\subsection{method2:Randonmized Sampling}
+参考文献中,将算法分为两个部分,首先是得到A所在空间的近似,第二部分即从A在空间上的投影恢复A的k个特征以及相应左右特征向量.
+\paragraph{stage1}
+第一部分选择文献中的4.1:
+\begin{itemize}
+  \item step1:构造一个$m\times l$的高斯随机阵$\Omega$
+  \item step2:$Y=A\Omega$
+  \item step3:[Q,~,~] = svd(Y,0)
+  \end{itemize}
+note:step3原版是进行qr分解,这里选择替换成了经济型的svd.
+
+\paragraph{stage2}
+与上一算法相同,选择了精确的SVD(A'Q)
+
+\section{数值实验}
+一共进行了两组实验,一个是要求的随机矩阵,一个是PCA产生的矩阵
+\subsection{随机矩阵}
+$A\in \mathbf{R}^{m\times n}$,m=2014,n=512.rank(A)=20.对于给定的正整数k,$[U,S,V]=method(A,k)$给出了最大的k个特征值S;U,V是对应的左右特征向量.我们用两种方式衡量svd的效果.
+\begin{itemize}
+  \item 1.比较$e_k=\|(I-U'U)A\|_2$与$\sigma_{k+1}$的距离,因为真解$U^*$极小化第一个量,且正好等于$\sigma_{k+1}$
+  \item 2.直接比较S与matlab自带的SVD算法求得的奇异值的差距:$err=\frac{S-S^*}{S^*}$
+\end{itemize}
+取定c=100,我们计算了$k=1,2,\cdots,20$的情况,计算结果见~\ref{fig:1-1}~\ref{fig:1-2}.然后,为了观察参数c对解的影响,我们对同一个矩阵k=10,20,$c=20,30,\cdots,100$进行了计算,$e_k$以及时间随c的变化见图~\ref{fig:1-3}~\ref{fig:1-4}
+
+\begin{figure}[htbp]
+\centering\includegraphics[width=3.5in]{1-1.eps}
+\caption{}\label{fig:1-1}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering\includegraphics[width=3.5in]{1-2.eps}
+\caption{}\label{fig:1-2}
+\end{figure}
+\begin{figure}[htbp]
+\centering\includegraphics[width=3.5in]{1-3.eps}
+\caption{}\label{fig:1-3}
+\end{figure}
+\begin{figure}[htbp]
+\centering\includegraphics[width=3.5in]{1-4.eps}
+\caption{}\label{fig:1-4}
+\end{figure}
+
+\paragraph{观察}
+\begin{itemize}
+    \item 如图~\ref{fig:1-2},奇异子空间计算结果很好
+  \item 直接比较奇异值的计算,如图~\ref{fig:1-1},会发现除了k=20时,计算效果并不算太好,这是因为算法本质上是计算了子空间的奇异值.
+  \item 两个算法的时间花费基本关于c是线性的
+  \item 在k=10时,如图~\ref{fig:1-3},随着c的增大,可以看到精度的提升.但当k=20时,精度随着c的变化没有明显的提高,这是由于k=20时,$e_20$在理论上应该是0,所以对其的计算是通过计算一个近似0矩阵的范数,这本身有误差存在
+\end{itemize}
+\subsection{PCA}
+选择PCA中的case1,m=n=10000,再用DCT生成对应的矩阵A,对$k=10,20,\cdots,50$,c=500
+\begin{figure}[htbp]
+\centering\includegraphics[width=3.5in]{1-4.eps}
+\caption{}\label{fig:1-5}
+\end{figure}
+如图~\ref{fig:1-5},两种方法的$e_k$与$\sigma_{k+1}$的差距均在一个量级内,method2的精度更高.时间方面两种方法的耗时比起matlab自带的svds的耗时快,而且随k的增长不明显.其中svds每次计算最大的k+1个奇异值.
+  \end{document} 
