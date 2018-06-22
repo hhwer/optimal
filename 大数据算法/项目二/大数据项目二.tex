@@ -1,0 +1,207 @@
+\documentclass[UTF8]{ctexart}
+\usepackage{CJKutf8}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{diagbox}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage[linesnumbered,boxed,ruled,commentsnumbered]{algorithm2e}
+\usepackage{cite}
+
+  \author{黄晃\ 数院 1701210098 }
+  \title{大数据项目二}
+\begin{document}
+
+  \maketitle
+  \section{问题}
+  原问题为
+  \begin{equation}\label{p:1}
+    \begin{split}
+       min\  &  \frac{1}{n}f_i(w)+\lambda\|w\|_1 \\
+    \end{split}
+  \end{equation}
+  where $f_i(w)=log(1+exp(-y^iw^Tx^i)and lambda>0$
+  \paragraph{}
+  为了使用stochastic optimization,可以将问题改写成
+    \begin{equation}\label{p:2}
+    \begin{split}
+       min\  &  \frac{1}{n}f_i(w)\\
+    \end{split}
+  \end{equation}
+  where $f_i(w)=log(1+exp(-y^iw^Tx^i)+\lambda\|w\|_1$
+  \subsection{数据集}
+    使用要求的两个数据集:MINIST和Coverttype.
+    \paragraph{MINIST}
+    一共70000个样本,其中每个$x^i$是28*28的灰度矩阵向量化的结果,而$y^i$是该幅图片对应的label
+    \paragraph{Covertype}
+    一共581012个样本,其中每个$x^i$是54维向量
+    \paragraph{数据归一化}
+    对于$X=[x_1,x_2,\cdots,x_N]=[a_1,a_2,\cdots,a_p]^T$,我们对其进行行归一化,即取$\hat{X}=[\hat{a_1},\hat{a_2},\cdots,\hat{a_p}]^T$,其中$\hat{a_i}=a_i/max(a_i)$
+    \subsection{算法}
+  一共实现了要求的两个算法:SAG和SVRG以及附加任务:使用BB步长的SG方法
+
+
+  \subsubsection{SGD}
+  在~\cite{bottou2010large}中介绍了随机梯度方法,即将正常的梯度下降
+  $$
+  w_{k+1} = w_k-\alpha_k \nabla f(x_k)
+  $$
+  改成了随机版本
+  $$
+  w_{k+1} = w_k-\alpha_k \nabla f_{s_k}(x_k)
+  $$
+  其中$s_k$随机取样于$\{1,2,\cdots,n\}$
+  \subsubsection{SAG}
+  在SGD的基础上,文献~\cite{schmidt2017minimizing}提出了一个平均的思想,即将下降修改成了
+  $$w_{k+1}=w_k-\alpha_k(\frac{1}{n}(\nabla f_{s_k}(w_k)-g_{k+1}^{s_k})+\frac{1}{n}\sum_{i=1}^{N}g_{k-1}^i)$$
+  其中
+  \begin{equation*}
+    g_k^i= \left\{
+    \begin{array}{cc}
+      \nabla f_{i}(w_k) &if\ i=s_k\\
+      g_{k+1}^{s_k} & else
+    \end{array}
+    \right.
+  \end{equation*}
+  所以需要存储每个$f_i$随着随机量$s_K$最近一次被计算时得到的值作为$g_k^i$.此外,为了启动算法,在第一次迭代开始前,对每个$f_i$计算一次相应的次梯度
+
+
+
+  \subsubsection{SVRG}
+
+\begin{algorithm}
+    \SetAlgoNoLine % 不要算法中的竖线
+    \SetKwInOut{Input}{\textbf{输入}}\SetKwInOut{Output}{\textbf{输出}} % 替换关键词
+
+    \Input{
+        \\
+        步长 $\eta$\;\\
+        迭代数 $T$\;\\
+        内循环次数 $m$ \;\\
+        初值 $\hat{x_0}$\;\\}
+    \Output{
+        \\
+        $\hat{x_T}$\;\\}
+    \BlankLine
+
+    \For {$j=1,2,\cdots,T$}{
+        $g_j=\nabla f(\hat{x_{j-1}})=\frac{1}{n}\sum_{i=1}^{n}\nabla f_i(\hat{x_{j-1}})$ \;
+        $x_0^{(j)}\leftarrow \hat{x_{j-1}}$ \;
+        $N_j\leftarrow m$ \;
+        \For {$k=1,2,\cdots,N_j$}{
+            Random pick $i_k\in [n]$\;
+            $\nu_{k-1}^{(j)}\leftarrow \nabla f_{i_k}(x_{k-1}^{(j)})-f_{i_k}(x_{0}^{(j)})+g_j$\;
+            $ x_k^{(j)\leftarrow x_{k-1}^{(j)}}-\eta \nu_{k-1}^{(j)} $ \;
+        }
+        $\hat{x_j}\leftarrow x_{N_j}^{(j)}$\;
+    }
+    \caption{Stochastic Variance Reduced Gradient(SVRG)\label{al1}}
+\end{algorithm}
+  每求一次完整的函数f的梯度,进行m次随机梯度的迭代,然后将结果的平均作为外部循环的结果.每次内循环的下降方向选择为
+  $$
+  v_k=\nabla f_{s_k}(w_k)-\nabla f_{s_k}(y)+\nabla f(w_i)
+$$
+其中$w_i$为外循环第i步的值
+\paragraph{参数}
+内循环次数m=2n.
+\subsubsection{MSVRG}
+在~\cite{reddi2016stochastic}中,考虑到并行性以及通信的成本,对SVRG的内循环部分进行了改进,在第7行增加了一个mini batch的集合$I_k$,然后求这个集合的f的梯度而不是单独某一个
+\begin{algorithm}
+    \SetAlgoNoLine % 不要算法中的竖线
+    \SetKwInOut{Input}{\textbf{输入}}\SetKwInOut{Output}{\textbf{输出}} % 替换关键词
+
+    \Input{
+        \\
+        步长 $\eta$\;\\
+        迭代数 $T$\;\\
+        内循环次数 $m$ \;\\
+        初值 $\hat{x_0}$\;\\}
+    \Output{
+        \\
+        $\hat{x_T}$\;\\}
+    \BlankLine
+
+    \For {$j=1,2,\cdots,T$}{
+        $g_j=\nabla f(\hat{x_{j-1}})=\frac{1}{n}\sum_{i=1}^{n}\nabla f_i(\hat{x_{j-1}})$ \;
+        $x_0^{(j)}\leftarrow \hat{x_{j-1}}$ \;
+        $N_j\leftarrow m$ \;
+        \For {$k=1,2,\cdots,N_j$}{
+            mini batch $I_k\in [n]$\;
+            $\nu_{k-1}^{(j)}\leftarrow \sum_{i_k\in I_k}(\nabla f_{i_k}(x_{k-1}^{(j)})-f_{i_k}(x_{0}^{(j)}))+g_j$\;
+            $ x_k^{(j)\leftarrow x_{k-1}^{(j)}}-\eta \nu_{k-1}^{(j)} $ \;
+        }
+        $\hat{x_j}\leftarrow x_{N_j}^{(j)}$\;
+    }
+    \caption{Minibatch Stochastic Variance Reduced Gradient(MSVRG)\label{al2}}
+\end{algorithm}
+\paragraph{参数选择}
+根据文献理论结果,minibatch大小为10,内部循环次数m取成$\frac{n}{10}$
+  \subsubsection{SAGA}
+  在文献~\cite{defazio2014saga}中,结合了SVRG的优点,将SAG方法的更新方向修改成无偏的版本
+  $$w_{k+1}=w_k-\alpha_k(\nabla f_{s_k}(w_k)-g_{k+1}^{s_k}+\frac{1}{n}\sum_{i=1}^{N}g_{k-1}^i)$$
+\subsubsection{SCSG}
+为了支持非强凸问题,在献~\cite{lei2016less}对SVRG的第二行进行了改进,在计算整体梯度$g_j$时,不再对所有的$f_i$求梯度,而是去了其中大小为B的一部分.然后内循环次数$N_j\sim Geom(\frac{B}{B+1})$.但同时作者表明实验中,取固定的$N_j=B$的效果一样;内循环$i\in [n]$与$i \in I_j$表现也相当.因此,为了节省计算量,我们在这两点上都选择了后一种方式.
+\begin{algorithm}
+    \SetAlgoNoLine % 不要算法中的竖线
+    \SetKwInOut{Input}{\textbf{输入}}\SetKwInOut{Output}{\textbf{输出}} % 替换关键词
+
+    \Input{
+        \\
+        步长 $\eta$\;\\
+        迭代数 $T$\;\\
+        batch size $B$ \;\\
+        初值 $\hat{x_0}$\;\\}
+    \Output{
+        \\
+        $\hat{x_T}$\;\\}
+    \BlankLine
+
+    \For {$j=1,2,\cdots,T$}{
+        Uniform sample a batch $I_j\in {1,2,\cdots,n}.$其中$|I_j|=B$\;
+        $g_j=\nabla f(\hat{x_{j-1}})=\frac{1}{n}\sum_{i\in I_j}\nabla f_i(\hat{x_{j-1}})$ \;
+        $x_0^{(j)}\leftarrow \hat{x_{j-1}}$ \;
+        $N_j \leftarrow B $\;
+        \For {$k=1,2,\cdots,N_j$}{
+            Random pick $i_k\in I_j$\;
+            $\nu_{k-1}^{(j)}\leftarrow \nabla f_{i_k}(x_{k-1}^{(j)})-f_{i_k}(x_{0}^{(j)})+g_j$\;
+            $ x_k^{(j)\leftarrow x_{k-1}^{(j)}}-\eta \nu_{k-1}^{(j)} $ \;
+        }
+        $\hat{x_j}\leftarrow x_{N_j}^{(j)}$\;
+    }
+    \caption{Stochastically Controlled Stochastic Gradient (SCSG)\label{al3}}
+\end{algorithm}
+
+\subsection{计算细节}
+在计算函数值以及梯度时会遇到如下两类问题
+\begin{itemize}
+  \item 计算$\frac{e^x}{1+e^x}$时$e^x=inf$
+  \item 计算$log(1+e^x)$时$e^x=inf$
+\end{itemize}
+我们将其处理成$\frac{e^x}{1+e^x}=1,log(1+e^x)=x$
+\section{计算结果}
+
+对$\lambda=10,1,0.1,0.001,\frac{1}{n}$进行了实验
+\paragraph{参数}
+SVRG中$m=\frac{n}{10}$,SVRG以及SAG中$\alpha=0.01$,SVRG一共进行了20次迭代,SAG进行了n次迭代,sgBB进行了2n次迭代.
+\paragraph{误差定义}
+参考文献定义Testing Error$R(w)=\sum_{i=1}^{n}log(1+exp(-b^iw^Ta^i))$
+\paragraph{结果取样}
+由于R(w)的计算量太大,在展示结果时,我们只等距的选取了20个点的值来作图
+\paragraph{x轴}
+仿照参考文献,做了三类图,其x轴分别为迭代次数,求导次数,时间.在这里求导次数定义为单个$f_i$的求导次数.所以SVRG一次迭代求导次数了增加n+m次.
+\paragraph{图注}
+在每一组图的图注位置,在相应算法后记录最后时刻的R(w)
+
+\subsection{MINIST}
+
+\subsection{COVERTYPE}
+
+
+
+
+\subsection{结果分析}
+
+
+\bibliographystyle{plain}
+\bibliography{1}
+\end{document} 

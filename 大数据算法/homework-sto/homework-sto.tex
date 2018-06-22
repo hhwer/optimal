@@ -5,6 +5,7 @@
 \usepackage{diagbox}
 \usepackage{hyperref}
 \usepackage{xcolor}
+\usepackage[linesnumbered,boxed,ruled,commentsnumbered]{algorithm2e}
 \usepackage{cite}
 
   \author{黄晃\ 数院 1701210098 }
@@ -39,6 +40,39 @@
     \subsection{算法}
   一共实现了要求的两个算法:SAG和SVRG以及附加任务:使用BB步长的SG方法
   \subsubsection{SAG}
+
+\begin{algorithm}
+
+    \SetAlgoNoLine % 不要算法中的竖线
+    \SetKwInOut{Input}{\textbf{输入}}\SetKwInOut{Output}{\textbf{输出}} % 替换关键词
+
+    \Input{
+        \\
+        The observed user-item pair set $S$\;\\
+        The feature matrix of items $F$\;\\
+        The content features entities $A := \{A^u,A^v\}$\;\\}
+    \Output{
+        \\
+        $\Theta \  := \{Y^u,Y^v\}$\;\\
+        $W := \{W^u,W^v\}$\;\\}
+    \BlankLine
+
+    initialize the model parameter $\Theta$ and $W$ with uniform $\left(-\sqrt{6}/{k},\sqrt{6}/{k}\right)$\; % 分号 \; 区分一行结束
+    standarized $\Theta$\;
+    Initialize the popularity of categories $\rho$ randomly\;
+    \Repeat
+        {\text{convergence}}
+        {Draw a triple $\left(m,i,j\right)$ with 算法\ref{al2}\;
+            \For {each latent vector $\theta \in \Theta$}{
+                $\theta \leftarrow \theta - \eta\frac{\partial L}{\partial \theta}$
+            }
+            \For {each $W^e \in W$}{
+                Update $W^e$ with the rule defined in Eq.\ref{equ:W}\;
+            }
+        }
+    \caption{Learning paramters for BPR\label{al3}}
+\end{algorithm}
+
   $$w_{k+1}=w_k-\alpha_k(\frac{1}{n}(\nabla f_{s_k}(w_k)-g_{k+1}^{s_k})+\frac{1}{n}\sum_{i=1}^{N}g_{k-1}^i)$$
   其中
   \begin{equation*}

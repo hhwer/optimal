@@ -1,11 +1,11 @@
-a =  loadMNISTImages('train-images.idx3-ubyte');
-a1 = loadMNISTImages('t10k-images.idx3-ubyte');
-a = [a,a1];
-a = a';
-b = loadMNISTLabels('train-labels.idx1-ubyte');
-b1 = loadMNISTLabels('t10k-labels.idx1-ubyte');
-b = [b;b1];
-[n,p] = size(a);
+% a =  loadMNISTImages('train-images.idx3-ubyte');
+% a1 = loadMNISTImages('t10k-images.idx3-ubyte');
+% a = [a,a1];
+% a = a';
+% b = loadMNISTLabels('train-labels.idx1-ubyte');
+% b1 = loadMNISTLabels('t10k-labels.idx1-ubyte');
+% b = [b;b1];
+% [n,p] = size(a);
 hatx0 = zeros(1,p);
 lambda = 1/n;
 m = n/10;
@@ -45,27 +45,27 @@ draw = 3;
  time2 = 0:t2/20:t2-0.01;
  time3 = 0:t3/20:t3-0.01;
  
-figure(1);
- subplot(1,3,1)
- plot(ite1,f1,'+',ite2,f2,'*');
- xlabel('iterations')
- ylabel('test Error')
- legend('sag','svrg')
- 
-  subplot(1,3,2)
- plot(num1,f1,'+',num2,f2,'*');
- xlabel('gradient evaluations')
- ylabel('test Error')
- legend('sag','svrg')
- subplot(1,3,3)
- 
- plot(time1,f1,'+',time2,f2,'*');
- xlabel('times')
- ylabel('test Error')
-   legend(['sag(',num2str(f1(20)),')'],    ...
-                        ['svrg(',num2str(f2(20)),')']);
- 
- suptitle(['MINIST lambda=',num2str(lambda)])
+% figure(1);
+%  subplot(1,3,1)
+%  plot(ite1,f1,'+',ite2,f2,'*');
+%  xlabel('iterations')
+%  ylabel('test Error')
+%  legend('sag','svrg')
+%  
+%   subplot(1,3,2)
+%  plot(num1,f1,'+',num2,f2,'*');
+%  xlabel('gradient evaluations')
+%  ylabel('test Error')
+%  legend('sag','svrg')
+%  subplot(1,3,3)
+%  
+%  plot(time1,f1,'+',time2,f2,'*');
+%  xlabel('times')
+%  ylabel('test Error')
+%    legend(['sag(',num2str(f1(20)),')'],    ...
+%                         ['svrg(',num2str(f2(20)),')']);
+%  
+%  suptitle(['MINIST lambda=',num2str(lambda)])
  
  
  figure(2);
