@@ -1,0 +1,105 @@
+\documentclass[UTF8]{ctexart}
+\usepackage{CJKutf8}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{xcolor}
+\usepackage{cite}
+\usepackage{indentfirst}
+
+  \author{黄晃 数院 1701210098 }
+  \title{凸优化第二次上机作业}
+\begin{document}
+  \maketitle
+  \section{问题}
+  原问题为
+  \begin{equation}\label{p:1}
+    \begin{split}
+       min\  & \frac{1}{2}\|Ax-b \|_{2}^{2} + \mu \|x\|_{1} \\
+    \end{split}
+  \end{equation}
+  \subsection{cvx calling mosek or gurobi}
+  因为primal~\ref{p:1}是个凸问题,cvx下可以直接
+  $$minimize(1/2sum_{-}square(A*x-b)+mu*norm(x,1))$$
+
+
+  \section{smoothed primal problem}
+  一共使用了三种光滑函数:$huber,log-sum-exp,sqrt$,光滑化的程度由参数lambda给出.
+  \subsection{gradient method}
+  使用bb步长的梯度方法求解,光滑函数选择为sqrt,加上对$\mu$的同伦:$\mu=[10,1,0.1,0.01,0.001]$,对应的参数$lambda=[1e-1,1e-2,1e-3,1e-5,1e-6]$,因为$\mu$较大时的解只是作为之后的初值,所以为了加速收敛,相应的使用较大的lambda.
+  \subsection{fast gradient method}
+  使用Nesterov加速,因为作用在光滑之后的函数上,所以可以视作
+  $$
+  f(x) = g(x)+h(x)\ ,\ h(x)=0; 
+  $$
+  所以有
+  $$prox_{h}(x)=x$$
+  所以迭代格式为
+      \begin{equation}
+    \begin{split}
+    y &= x_{k-1} + \frac{k-2}{k+1}(x_{k-1}-x_{k-2}) \\
+    x_{k}&= y - t\nabla f(y)
+    \end{split}
+  \end{equation}
+  \paragraph{参数}
+  参数选择为$\mu=[10,0.1,0.001]$,对应的参数$lambda=[1e-2,1e-4,1e-6]$.步长选为恒定步长$t=\frac{1}{L}$,为使得L满足lipschtz,令$L = A^{T}A + 2\mu$
+  \section{Proximal gradient method}
+  问题为
+        \begin{equation}
+    \begin{split}
+    f(x)=  &g(x)+h(x) \\
+    g(x)=&  \| Ax-b\|_{2}^{2} \\
+    h(x)= & \mu \|x\|_{1}   
+    \end{split}
+  \end{equation}
+  所以$th(x)$的近似点逼近为
+
+ $$
+  prox_{th}(x)_{i} = \left\{
+  \begin{array}{rcl}
+    x_{i}-\mu t & x_{i} \geq \mu t \\
+    0 &      -\mu t \leq x_{i} \leq \mu t\\
+    x_{i}+\mu t & x_{i} \leq \mu t 
+  \end{array}
+\right.
+$$
+  \subsection{proximal gradient method for primal problem}
+迭代格式为
+        \begin{equation}
+    \begin{split}
+    y =  & x_{k-1} - t\nabla g(x_{k-1}) \\
+    x_(x)=&  prox_{th}(y)
+    \end{split}
+  \end{equation}
+  \paragraph{参数}
+  加上同伦$mu = [10,1,0.1,0.01,1e-3]$,步长$t_{k}=1/L,L=\lambda_{max}(A^{T}A) $
+  \subsection{fast proximal gradent method}
+  迭代格式为
+        \begin{equation}
+    \begin{split}
+    u = &x_{k-1} + \frac{k-2}{k+1}(x_{k-1}-x_{k-2}) \\
+    y =  & x_{k-1} - t\nabla g(u) \\
+    x_(x)= &  prox_{th}(y) 
+    \end{split}
+  \end{equation}
+  \paragraph{参数}
+  加上同伦$mu = [10,1,0.1,0.01,1e-3]$,步长$t_{k}=1/L,L=\lambda_{max}(A^{T}A) $
+  \section{计算结果}
+  \begin{tabular}{|r|r|r|}
+\hline
+method & cpu & err\\ \hline
+  cvx-call-mosek:  & 1.35& 0.00e+00 \\
+           grdient for smoothed problem: & 1.68 &1.70e-07 \\
+     fast gradient for smoothed problem:  & 1.55 & 2.02e-06\\
+      proximal gradient for primal:&  4.00 & 3.21e-06\\
+fast peximal gradient method for primal: &  2.32& 2.08e-06 \\
+\hline
+\end{tabular}
+\subsection{结果分析}
+
+\begin{itemize}
+  \item 四个算法都达到了要求精度
+  \item 对同一方法,使用了Nesterovs加速技巧后,收敛速度得到了提升.尤其对于proximal\  gradient方法,加速效果明显
+  \item 相较于直接求解原问题,在对原问题进行了适当的光滑化之后的求解速度更快
+\end{itemize}
+
+  \end{document}

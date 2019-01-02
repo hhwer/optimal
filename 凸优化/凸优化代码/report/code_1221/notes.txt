@@ -1,0 +1,11 @@
+计算flop的参考网址：
+http://research.microsoft.com/en-us/um/people/minka/software/lightspeed/
+
+其他的flop
+1. The computation of the Frobenius norm is very easy: it requires about nm flops.
+2. The computation of the largest singular value norm of a matrix is not as easy as with the Frobenius norm. Hovewer, it can be computed with linear algebra methods seen here, in about min(n,m)nm flops.
+
+
+TCC
+TCC between two matrices: the sum of their canonical correlations as defined in Lemma 1.1
+TCC(A,B) = sum ( A和B的canonical correlations )

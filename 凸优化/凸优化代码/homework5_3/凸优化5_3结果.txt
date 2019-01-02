@@ -1,0 +1,4 @@
+                 cvx-call-mosek: cpu:  1.73, err-to-cvx-mosek: 0.00e+00, Optimal objective:7.61e-02
+           ALM for dual problem: cpu:  0.10, err-to-cvx-mosek: 4.30e-06, Optimal objective:7.62e-02
+          ADMM for dual problem: cpu:  0.08, err-to-cvx-mosek: 4.26e-06, Optimal objective:7.62e-02
+  ADMM_linearization for primal: cpu:  0.59, err-to-cvx-mosek: 3.63e-06, Optimal objective:7.61e-02

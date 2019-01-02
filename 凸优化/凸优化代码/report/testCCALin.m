@@ -1,0 +1,12 @@
+clc;
+clear;
+k = 5;
+n = 100;
+T = 500;
+d1 = 90;
+d2 = 110;
+X = randn(n,d1);
+Y = randn(n,d2);
+SXY = X'*Y/n;
+[Wx,Wy] = CCALin(X, Y, T, k);
+p = Wx'*SXY*Wy;

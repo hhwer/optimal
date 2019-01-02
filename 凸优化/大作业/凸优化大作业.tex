@@ -1,0 +1,347 @@
+\documentclass[UTF8]{ctexart}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{xcolor}
+\usepackage{cite}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{indentfirst}
+\usepackage{hyperref}
+
+  \author{黄晃 数院 1701210098 }
+  \title{最优化大作业}
+\begin{document}
+  \maketitle
+
+
+\section{Semi-smooth Newton method based on solving a fixed-point equation}
+\subsection{(a)Write down and implement the DRS for (1.1) and ADMM for the dual problem of (1.2)}
+\subsubsection{DRS for primal}
+对于primal问题(1.1),我们将其改写成
+\begin{align*}
+  f(x) & = c^Tx + I_{\{Ax=b\}} \\
+  h(x) & = I_{\{x\geq 0\}}
+\end{align*}
+然后对其应用DRS方法:
+\begin{equation}
+  \begin{split}
+     x^{k+1} =& Prox_{th}(z^k)\\
+      u^{k+1}= & Prox_{tf}(2x^{k+1}-z^k)\\
+       z^{k+1}=& z^k+u^{k+1}-x^{k+1}
+  \end{split}
+\end{equation}
+易见x的更新即:
+$$
+x^{k+1} = Prox_{th}(z^k) = P_{z\geq 0}(z^k)
+$$
+下面推导第二行u的更新
+\paragraph{$Prox_{tf}(y)$的计算}
+\begin{align*}
+  Prox_{tf}(y) & =\arg\min_u f(u)+\frac{1}{2t}\|u-y\|^2\\
+   &             =\arg_{\{Au=b\}}\min_u c^Tu+ \frac{1}{2t}\|u-y\|^2
+\end{align*}
+我们将其视作关于变量u的极小化问题,其lagrangian函数为:
+\begin{align*}
+  L(u,\lambda) & =c^Tu + \frac{1}{2t}\|u-y\|^2 + \lambda^T(Au-b)\\
+   &             =\frac{1}{2t}u^Tu + u^T(c+A^T\lambda-\frac{1}{t}y) -\lambda^Tb+\frac{1}{2t}y^Ty
+\end{align*}
+由一阶条件,在$u_0=y-t(A^T\lambda+c)$处取最小值,所以对偶函数为
+\begin{align*}
+  g(\lambda) & =L(u_0,\lambda)\\
+   &           =\frac{1}{2t}u_0^Tu_0 + u_0^T(c+A^T\lambda-\frac{1}{t}y) -\lambda^Tb+\frac{1}{2t}y^Ty \\
+   &           =\frac{1}{2t}u_0^Tu_0 - u_0^T\frac{1}{t}u_0 -\lambda^Tb+\frac{1}{2t}y^Ty \\
+   &           =\frac{-1}{2t}u_0^Tu_0 -\lambda^Tb+\frac{1}{2t}y^Ty \\
+   &           =\frac{-1}{2t}(y-t(A^T\lambda+c))^T(y-t(A^T\lambda+c)) - \lambda^Tb+\frac{1}{2t}y^Ty\\
+   &           =\frac{-t}{2}(A^T\lambda+c)^T(A^T\lambda+c) + y^T(A^T\lambda+c)-\lambda^Tb\\
+   &           =\frac{-t}{2}\lambda^TAA^T\lambda +\lambda^T(-tAc+Ay-b) +y^Tc -\frac{t}{2}c^Tc
+\end{align*}
+由一阶条件,在$AA^T\lambda=-Ac+\frac{1}{t}(Ay-b)$处取极大.然后我们可以通过这个等式解得(假设A满秩)$\lambda$,然后计算对应的$u_0=y-t(A^T\lambda+c)$的值作为$Prox_{tf}(y)$.
+\paragraph{}
+由此,我们可以将算法写作:
+\begin{equation}
+  \begin{split}
+     x^{k+1} &=  P_{z\geq 0}(z^k)\\
+     y      &= 2x^{k+1}-z^k\\
+      solve\ AA^T\lambda&=-Ac+\frac{1}{t}(Ay-b) \\
+      u^{k+1} &= y-t(A^T\lambda+c)\\
+       z^{k+1}&= z^k+u^{k+1}-x^{k+1}
+  \end{split}
+\end{equation}
+
+
+
+\subsubsection{ADMM for dual}
+对于dual问题(1.2),将其写为下面形式
+\begin{equation}
+  \begin{split}
+     min & -b^Ty \\
+      s.t. & A^Ty+s=c \\
+       & s\geq 0
+  \end{split}
+\end{equation}
+取$f(y)=-b^Ty,g(s)=I_C(s),C=R_+$,则问题可写作
+\begin{equation}
+  \begin{split}
+     min & f(y)+g(s) \\
+      s.t. & A^Ty+s=c
+  \end{split}
+\end{equation}
+该问题对应的标准ADMM为:
+\begin{equation}
+  \begin{split}
+     y^{k+1} =& argmin_y f(y)+g(s^k)+\frac{\beta}{2}\|A^Ty+s^k-c-x^k \|_2^2 \\
+      s^{k+1}= & argmin_s f(y^{k+1})+ g(s)+\frac{\beta}{2}\|A^Ty^{k+1}+s-c-x^k \|_2^2 \\
+       x^{k+1}=& x^k-(A ^Ty^{k+1}+s^{k+1}-c)
+  \end{split}
+\end{equation}
+对于第一个极小问题,根据一阶条件,其解为
+$$
+\beta(AA^Ty+As^k-Ac-Ax^k)-b=0
+$$
+对于第二个极小问题,我们选择非精确求解(实际是精确的,见(b)部分推导):
+$$
+s = P_C(c+x^k-A^Ty^{k+1})
+$$
+\subsection{(b)Derive the explicit relationship between the variables of DRS and ADMM mentioned above}
+对于该问题DRS以及ADMM方法解的关系,我们不直接使用上面给出的ADMM的格式,而是采用其另一种等价格式(本质上就是做变换$x=\beta x$,使两种方法的x能意义相同)
+\paragraph{ADMM等价形式}
+令$\beta = t$
+\begin{equation}
+  \begin{split}
+     y^{k+1} & =argmin_y f(y)+g(s^k)+(A^Ty+s^k-c)^Tx^k+\frac{t}{2}\|A^Ty+s^k-c \|_2^2 \\
+      s^{k+1} & =argmin_s f(y^{k+1})+ g(s)+(A^Ty^{k+1}+s-c)^Tx^k+\frac{t}{2}\|A^Ty^{k+1}+s-c \|_2^2 \\
+       x^{k+1}&= x^k+t(A^Ty^{k+1}+s^{k+1}-c)
+  \end{split}
+\end{equation}
+对于第一行,由一阶条件:
+$$
+AA^Ty^{k+1} = A(c-s^k)+\frac{1}{t}(b-A^Tx^k)
+$$
+对第二行,将其视作
+\begin{align*}
+  min &  s^Tx+\frac{t}{2}s^Ts+ts^T(A^Ty-c)\\
+  s.t. & s\geq 0
+\end{align*}
+类似于DRS中的讨论,这可以转化为对偶问题的求解
+\begin{align*}
+  min &  \frac{1}{2t}\lambda^T\lambda + \lambda^T(\frac{x}{t}-c+A^Ty)\\
+\end{align*}
+解得$\lambda=min(0,-x+t(c-A^Ty))$,对应的
+\begin{align*}
+  s & =c-A^Ty-\frac{1}{t}(\lambda+x) \\
+   & =c-A^Ty-\frac{x}{t}-min(0,c-A^Ty-\frac{x}{t})\\
+   & =max(0,c-A^Ty-\frac{x}{t})
+\end{align*}
+这同时也说明了我们上一部分中所谓的对第一个极小问题的近似求解,实质上是精确求解.
+\paragraph{}
+则x的更新:
+\begin{align*}
+  x^{k+1} & = x^k+t(A^Ty^{k+1}+s^{k+1}-c) \\
+   & =x^k+t(A^Ty^{k+1}-c+max(0,c-A^Ty-\frac{x^k}{t}))\\
+   & =x^k+t(A^Ty^{k+1}-c+max(0,c-A^Ty-\frac{x^k}{t})) \\
+   & =x^k+t(A^Ty^{k+1}-c)+max(0,t(c-A^Ty)-x^k)) \\
+   & =max(0,x^k+t(A^Ty^{k+1}-c))
+\end{align*}
+由此,ADMM可以写成
+\begin{equation}
+  \begin{split}
+     AA^Ty^{k+1}& = A(c-s^k)+\frac{1}{t}(b-Ax^k) \\
+      s^{k+1} & =max(0,c-Ay^{k+1}-\frac{x^k}{t}) \\
+       x^{k+1}=& max(0,x^k+t(A^Ty^{k+1}-c))
+  \end{split}
+\end{equation}
+在下面的部分,我们调整DRS的计算顺序,即假设最后更新x,这等价于将x的下标全部减1.
+\paragraph{DRS推ADMM}
+若先求出了DRS,直接比较两式,我们有
+\begin{equation}
+  \begin{split}
+     A^Ty^{k+1}& =-A^T\lambda^{k+1}-s^k+\frac{1}{t}(z^k+x^k)\\
+      &= c-s^k+\frac{1}{t}(u^{k+1}-x^k) \\
+      s^{k+1}& = max(0,s^k-\frac{u^{k+1}}{t})
+  \end{split}
+\end{equation}
+\paragraph{ADMM推DRS}
+若先求出了ADMM,则
+\begin{equation}
+  \begin{split}
+     u^{k+1} &= t(A^Ty^{k+1}+s^k-c)+x^k \\
+      z^{k+1} &= z^k+u^{k+1}-x^k\\
+              &= 2x^k-u^{k+1}-t(A^T\lambda^k+c) + u^{k+1} -x^{k}\\
+              &=x^k - t(A^T\lambda^k+c)
+  \end{split}
+\end{equation}
+\subsection{ regularized semi-smooth Newton method}
+将GRS方法写成不动点问题
+$$
+F(z)=prox_{th}(z)-prox_{tf}(2prox_{th}(z)-z)=0.
+$$
+\subsubsection{ Clarke’s generalized Jacobian}
+不妨假设A满秩,则:
+\begin{align*}
+  Prox_{tf}(y) &= y-tc-A^T(AA^T)^{-1}(Ay-b-tAc), \\
+  Prox_{th}(y) &= P_{y\geq 0}(y).
+\end{align*}
+所以我们有
+\begin{equation}\label{eq:J}
+\begin{split}
+  D & \equiv \partial prox_{tf}(y) = I-A^T(AA^T)^{-1}A, \\
+  M & \equiv \partial prox_{th}(y)= diag(max(sign(y_i),0)),\\
+  J &\equiv \partial F(y) = M + D(I-2M).
+\end{split}
+\end{equation}
+\subsubsection{Newton direction}
+给定$z^k$,Newton direcion $s^k$通过如下方程求解:
+\begin{equation}\label{eq:s}
+  (J_k+\mu_k I)s^k=-F^k.
+\end{equation}
+
+其中$J_k\in \partial_B F(z^k),F^k=F(z^k),\mu_k=\lambda_k\|F^k\|_2,\lambda_k>0$.只需不精确求解如上方程,满足残差
+$$
+\|r^k\|\leq \tau min(1,\lambda_k \|F^k\|\|s^k\|)
+$$
+其中
+$$
+r^k = (J_k+\mu_k I)s^k+F^k.
+$$
+\subsubsection{Updating$ z^k$}
+记$u^k=z^k+s^k,\xi_0=\|F(z^0)\|_2. $若$\|F(u^k)\|_2\leq \nu \xi_k,0<\nu <1$,则:
+\begin{equation}\label{eq:z1}
+  z^{k+1} = u^k,\xi_{k+1}=\|F(u^k)\|_2and\lambda_{k+1}=\lambda_K.
+\end{equation}
+否则,引入
+$$
+\rho_k = \frac{-F(u^k)^Ts^k}{\|s^k\|^2}
+$$
+取参数$0<\eta_1<\eta_2<0.$以及
+\begin{align*}
+  v^k & =z^k - \frac{F(u^k)^T(z^k-u^k)}{\|F(u^k)\|_2^2}F(u^k), \\
+  w^k & =z^k-F(z^k).
+\end{align*}
+$z^{k+1}$的更新策略如下
+\begin{equation}\label{eq:z}
+z^{k+1}=\left\{
+\begin{split}
+  v^k, &\ if \rho_k\geq \eta_1 and \|F(v^k)\|_2 \leq\|F(z^k)\|_2 ,    \\
+  w^k, &\ if \rho_k\geq \eta_1 and \|F(v^k)\|_2 >\|F(z^k)\|_2 ,\\
+  z^k, &\ if \rho_k< \eta_1.
+\end{split}
+\right.
+\end{equation}
+相应的$\xi_{k+1},\lambda_{k+1}$的更新如下
+\begin{equation}\label{eq:xi}
+\xi_{k+1}=\xi_k,
+\lambda^{k+1}\in\left\{
+\begin{split}
+  (\lambda,\lambda_k), &\ if \rho_k\geq \eta_2,    \\
+  [\lambda_k,\gamma_1\lambda_k], &\ if \eta_1 \leq \rho_k< \eta_2,\\
+  (\gamma_1\lambda_k,\gamma_2\lambda_k], &\ otherwise.
+\end{split}
+\right.
+\end{equation}
+其中$1<\gamma_1<\gamma_2,\lambda>0$
+\begin{algorithm}[htb]
+\caption{regular semismooth newton method}
+\begin{algorithmic}[1]
+    \State Given $0<\tau,\nu<1,0<\eta_1<\eta_2<0\ and\ 1<\gamma_1<\gamma_2$;
+    \State Choose $z^0\ and\ \epsilon>0.Set k=0\ and\ \xi_0=\|F(z^0)\|_2$;
+    \While{$\|F(z^k)\|_2>\epsilon$}
+        \State compute $J_k$ by \ref{eq:J};
+        \State compute $s^k$ by \ref{eq:s};
+        \State compute $u^k=z^k+s^k$;
+        \If{$\|F(z^k)\|_2\leq \nu \xi_k$}
+            \State update $z,\xi,\lambda$ by \ref{eq:z1};
+        \Else
+            \State update $z,\xi,\lambda$ by \ref{eq:z} and \ref{eq:xi};
+        \EndIf
+        \State k=k+1;
+    \EndWhile
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{数值实验}
+用cpu时间衡量算法效率,用$err=\frac{f-f_{cvx}}{f_{cvx}},\eta_p=\frac{norm(Ax-b)}{1+norm(b)},\eta_d=\frac{norm(A'y+s-c)}{1+norm(c)}$衡量算法精确程度
+\subsubsection{random data}
+问题规模为$m=20,n=100$,计算结果如下表\\
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|}
+  \hline
+  % after \\: \hline or \cline{col1-col2} \cline{col3-col4} ...
+  method& \multicolumn{2}{c|}{$cvx_p$} &\multicolumn{4}{c|}{GRS} &\multicolumn{4}{c|}{semi-newton}\\
+  \hline
+  &cpu&$\eta_p$&cpu&$\eta_p$&err&ite&cpu&$\eta_p$&err&ite\\
+  \hline
+  &0.41 & 2.7e-16 & 0.17 & 1.5e-09 & -8.9e-09 & 3657& 0.01 & 2.3e-09 & 1.4e-08 & 31\\
+  \hline
+\end{tabular}
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|}
+  \hline
+  % after \\: \hline or \cline{col1-col2} \cline{col3-col4} ...
+  method& \multicolumn{2}{c|}{$cvx_d$} &\multicolumn{4}{c|}{ADMM}\\
+  \hline
+  &cpu&$\eta_d$&cpu&$\eta_d$&err&ite\\
+  \hline
+  & 0.34 & 1.7e-16 & 0.07 & 4.5e-08 & 3.6e-07 & 1436\\
+  \hline
+\end{tabular}
+\paragraph{}
+\begin{itemize}
+  \item 对于该规模的问题,三个算法都达到了足够的精度
+  \item 三个算法效率都高于cvx,尤其是semi-newton方法,仅31次就收敛
+\end{itemize}
+\subsubsection{netlib data}
+为了方便将netlib的问题格式转化成等价的(1.1),我们仅测试了$t_l=0,t_u=inf$的一些问题.在这个前提下,问题可通过下面给出的方式进行转化:
+\paragraph{}
+$a_1$为$b_u$中不为inf的下标集,$a_2$为$b_l$中不为-inf的下标集,取$A_1=A[a1,:],A_2=A[a2,:]$,引入新变量$u_1,u_2$满足$A_1x+u_1=b_u[a_1],A_2x+u_2=b_l[a_2]$,令
+\begin{equation*}
+  A = \left[
+  \begin{matrix}
+    A_1 & I & 0\\
+    A_2 & 0 & -I
+  \end{matrix}
+  \right],
+  x = [x,u_1,u_2]^T,b=[b_u[a1],b_l[a2]]^T,c=[c,0,0]^T
+\end{equation*}
+最大迭代步数设为10000步,所以当迭代步数ite=10000时说明没达到终止条件.\\
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|}
+  \hline
+  % after \\: \hline or \cline{col1-col2} \cline{col3-col4} ...
+  method& \multicolumn{2}{c|}{$cvx_p$} &\multicolumn{4}{c|}{GRS} &\multicolumn{4}{c|}{semi-newton}\\
+  \hline
+  &cpu&$\eta_p$&cpu&$\eta_p$&err&ite&cpu&$\eta_p$&err&ite\\
+  \hline
+  sc105pre &0.96 & 1.2e-16 & 0.45 & 6.0e-11 & 3.5e-11 & 3928& 4.51 & 2.0e-09 & 1.1e-09 & 7493\\
+  sc205pre &0.42 & 2.0e-16 & 1.12 & 5.4e-11 & 4.8e-11 & 6882& 6.82 & 3.4e-16 & 5.1e-01 & 10000\\
+  sc50apre &0.38 & 1.6e-16 & 0.06 & 3.2e-11 & 2.0e-12 & 1157& 0.25 & 2.8e-10 & 1.7e-11 & 1593\\
+  sc50bpre &0.41 & 1.1e-16 & 0.02 & 1.1e-11 & 8.9e-13 & 355& 0.08 & 1.2e-10 & 4.5e-12 & 425\\
+  scrs8pre &0.59 & 4.1e-16 & 5.59 & 4.2e+00 & 8.0e-01 & 10000& 859.06 & 3.1e-02 & 1.4e-01 & 10000\\
+  scsd1pre &0.64 & 1.5e-16 & 10.61 & 6.5e-02 & 7.2e-02 & 10000& 203.23 & 2.7e-08 & 9.5e-09 & 1198\\
+  scsd6pre &1.13 & 1.3e-16 & 20.86 & 9.0e-02 & 3.2e-02 & 10000&3615.23 & 8.1e-02 & 4.2e-01 & 10000\\
+  sctap1pre&0.74 & 2.7e-16 & 5.89 & 8.8e-03 & 4.9e-03 & 10000& 383.80 & 2.4e-03 & 9.6e-04 & 10000\\
+  wood1ppre&1.62 & 6.6e-14 & 196.2 & 8.0e+0 & 2.5e-2 & 10000& 4259.23 & 5.0e+01 & 2.8e-02 & 10000\\
+  \hline
+\end{tabular}
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|}
+  \hline
+  % after \\: \hline or \cline{col1-col2} \cline{col3-col4} ...
+  method& \multicolumn{2}{c|}{$cvx_d$} &\multicolumn{4}{c|}{ADMM}\\
+  \hline
+  &cpu&$\eta_d$&cpu&$\eta_d$&err&ite\\
+  \hline
+  sc105pre& 0.68 & 6.1e-17 & 0.17 & 6.4e-06 & 4.3e-08 & 1291\\
+  sc205pre&0.32 & 0.0e+00 & 0.57 & 3.5e-07 & 1.4e-05 & 3381\\
+  sc50apre&0.31 & 0.0e+00 & 0.03 & 2.5e-08 & 1.4e-08 & 652\\
+  sc50bpre&0.31 & 0.0e+00 & 0.01 & 3.2e-08 & 2.8e-09 & 248\\
+  scrs8pre&0.41 & 1.1e-16 & 11.02 & 5.4e-08 & 6.9e-01 & 10000\\
+  scsd1pre&0.59 & 1.3e-16 & 23.89 & 5.6e-15 & 3.3e-01 & 10000\\
+  scsd6pre&0.75 & 1.6e-16 & 21.05 & 4.7e-07 & 4.5e-01 & 10000\\
+  sctap1pre&0.61 & 2.5e-16 & 6.40 & 1.7e-06 & 2.0e-01 & 10000\\
+  wood1ppre&1.18 & 2.4e-15 & 180.74 & 1.7e-06 & 1.5e+00 & 10000\\
+  \hline
+\end{tabular}
+\paragraph{}
+\begin{itemize}
+  \item 对于我们选择的9个问题,GRS和ADMM方法均解决了前4个问题,semi-newton方法解决了不完全重合的4个问题
+  \item GRS方法未完全收敛的5个问题中有3个也达到了一定的精度(1e-2),semi-newton方法未解决的问题中有一个达到了(1e-4)
+  \item ADMM方法的结果显示,即使未收敛,结果也会很好的满足约束条件($\eta_d<1e-6$)
+  \item 对于规模较大的几个问题,semi-newton方法花费的时间远多于ADMM和GRS,这是因为每次迭代都有n维的线性方程求解
+\end{itemize}
+\end{document}
